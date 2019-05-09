@@ -1,12 +1,17 @@
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
   #include <avr/power.h>
+  #include <avr/pgmspace.h>
 #endif
 
-#define NUM_PIXELS 47
+#define NUM_PIXELS 93
 #define PIN 6
 #define COLORS 256
-#define BRIGHTNESS 5
+#define BRIGHTNESS 50
+#define RGB 3
+#define R 0
+#define G 1
+#define B 2
 #define OFF strip.Color(0,0,0)
 #define RED strip.Color(255,0,0)
 #define GREEN strip.Color(0,255,0)
@@ -24,11 +29,47 @@
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-uint16_t pixels [NUM_PIXELS] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,46,41,42,43,44,45,40};
-uint16_t outer [24] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23};
-uint16_t inner [16] = {39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24};
-uint16_t jewel [6] = {46,41,42,43,44,45};
-uint16_t center [1] = {40};
+uint16_t RINGS [6] = {32, 24, 16, 12, 8, 1};
+
+#define FRAMES 3
+const uint8_t testframe [FRAMES][NUM_PIXELS][RGB] PROGMEM = {
+                                                {
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},{255,255,255},
+                                                  {255,255,255},{255,255,255},{255,255,255}
+                                                },
+                                                {
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},{0,0,255},
+                                                  {0,0,255},{0,0,255},{0,0,255}
+                                                },
+                                                {
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},{255,0,0},
+                                                  {255,0,0},{255,0,0},{255,0,0}
+                                                }
+                                              };
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -60,72 +101,210 @@ void loop() {
   //theaterChase(strip.Color(127, 0, 0), 50); // Red
   //theaterChase(strip.Color(0, 0, 127), 50); // Blue
 
-  //rainbow(20);
-  //rainbowCycle(20);
+  //drawBitMap(testframe, FRAMES, 1024);
+  //rainbow(1);
+  //rainbowCycle(1);
   //theaterChaseRainbow(50);
   //colorSpin(strip.Color(255, 0, 0), 20);
   //randomFillUp(100);
   //colorBreathe(strip.Color(255, 0, 0), 20);
-  //colorSpin(Wheel(random() % COLORS), 50);
-  //colorBounce(Wheel(random() % COLORS), 50);
+  //colorSpin(Wheel(random() % COLORS), 2);
+  //colorBounce(Wheel(random() % COLORS), 2);
 
   //rainbow(5);
-  bullsEyeReverse(5);
+  //bullsEye(1, 64);
+  //bullsEyeOneRingAtaTime(200,64, true);
+  //fadeOut(5, 25);
+  //fadeIn(5, 25);
 }
 
-void bullsEye(uint8_t wait) {
-  uint16_t i, j;
-  uint16_t oneC, twoC, threeC, fourC;
-
-  for(j=0; j<COLORS*5; j++) { // 5 cycles of all colors on wheel
-
-    for (i=0; i<sizeof(outer)/sizeof(uint16_t); i++) {
-      strip.setPixelColor(outer[i], Wheel(j % 255)); 
+void drawBitMap(const uint8_t bitmaps [][NUM_PIXELS][RGB], uint8_t frames, uint16_t wait)
+{
+  for (int curFrame = 0; curFrame < frames; curFrame++)
+  {
+    for (int pixel = 0; pixel < NUM_PIXELS; pixel++) {
+      strip.setPixelColor(pixel, pgm_read_dword(&(bitmaps[curFrame][pixel][R])), pgm_read_dword(&(bitmaps[curFrame][pixel][G])), pgm_read_dword(&(bitmaps[curFrame][pixel][B])));
     }
-
-    for (i=0; i<sizeof(inner)/sizeof(uint16_t); i++) {
-      strip.setPixelColor(inner[i], Wheel(j+64 % 255)); 
-    }
-
-    for (i=0; i<sizeof(jewel)/sizeof(uint16_t); i++) {
-      strip.setPixelColor(jewel[i], Wheel(j+128 % 255)); 
-    }
-    
-    for (i=0; i<sizeof(center)/sizeof(uint16_t); i++) {
-      strip.setPixelColor(center[i], Wheel(j+192 % 255)); 
-    }
-    
     strip.show();
     delay(wait);
   }
 }
 
-void bullsEyeReverse(uint8_t wait) {
-  uint16_t i, j;
-  uint16_t oneC, twoC, threeC, fourC;
+void fadeInAndOut(uint8_t wait, uint32_t c) {
+    uint16_t i;
 
-  for(j=0; j<COLORS*5; j++) { // 5 cycles of all colors on wheel
+}
 
-    for (i=0; i<sizeof(center)/sizeof(uint16_t); i++) {
-      strip.setPixelColor(center[i], Wheel(j % 255)); 
-    }
+void fadeIn(uint8_t wait, uint32_t c) {
+  uint16_t i, p;
 
-    for (i=0; i<sizeof(jewel)/sizeof(uint16_t); i++) {
-      strip.setPixelColor(jewel[i], Wheel(j+64 % 255)); 
+  for (i = 0; i < BRIGHTNESS; i++)
+  {
+    for (p = 0; p < strip.numPixels(); p++) {
+      strip.setPixelColor(p, i, i, i);
     }
-    
-    for (i=0; i<sizeof(inner)/sizeof(uint16_t); i++) {
-      strip.setPixelColor(inner[i], Wheel(j+128 % 255)); 
-    }
-
-    for (i=0; i<sizeof(outer)/sizeof(uint16_t); i++) {
-      strip.setPixelColor(outer[i], Wheel(j+192 % 255)); 
-    }
-    
     strip.show();
     delay(wait);
   }
 }
+
+void fadeOut(uint8_t wait, uint32_t c) {
+  uint16_t i, p;
+
+  for (i = BRIGHTNESS; i > 0; i--)
+  {
+    for (p = 0; p < strip.numPixels(); p++) {
+      strip.setPixelColor(p, i, i, i);
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+//void spokes(uint8_t wait, uint32_t c) {
+//  uint16_t i;
+//  
+//  for (i=0; i<OUTER_LENGTH; i++) {
+//    if (i > 0) {
+//      strip.setPixelColor(outer[i-1], OFF);
+//      strip.setPixelColor(inner[(uint16_t)(i / ((float)OUTER_LENGTH/INNER_LENGTH)) - 1], OFF);
+//      strip.setPixelColor(jewel[(uint16_t)(i / ((float)OUTER_LENGTH/JEWEL_LENGTH)) - 1], OFF);
+//    }
+//    else if(i == 0) {
+//      strip.setPixelColor(outer[OUTER_LENGTH-1], OFF);
+//      strip.setPixelColor(inner[INNER_LENGTH-1 % INNER_LENGTH], OFF);
+//      strip.setPixelColor(jewel[JEWEL_LENGTH-1 % JEWEL_LENGTH], OFF);
+//    }
+//    
+//    strip.setPixelColor(outer[i], Wheel(c % 255));
+//    strip.setPixelColor(inner[(uint16_t)(i / ((float)OUTER_LENGTH/INNER_LENGTH))], Wheel(c % 255));
+//    strip.setPixelColor(jewel[(uint16_t)(i / ((float)OUTER_LENGTH/JEWEL_LENGTH))], Wheel(c % 255));
+//    strip.setPixelColor(center[0], Wheel(c % 255));
+//    strip.show();
+//    delay(wait);
+//  }
+//}
+
+void bullsEyeOneRingAtaTime(uint16_t wait, uint8_t gapValue, bool towardsIn) {
+  uint16_t i, j, k, idxSoFar;
+
+  for(k=0; k<COLORS*5; k++) { // 5 cycles of all colors on wheel
+    if (towardsIn) {
+      idxSoFar = 0;
+      for (j=0; j < sizeof(RINGS)/sizeof(uint16_t); j++){
+        allOff();
+        for (i=0; i<RINGS[j]; i++) {
+          strip.setPixelColor(i + idxSoFar, Wheel(k % 255)); 
+        }
+  
+        idxSoFar += RINGS[j];
+        strip.show();
+        delay(wait/(j+1));
+      }
+    }
+    else {
+      idxSoFar = NUM_PIXELS - 1;
+      for (j=-1 + sizeof(RINGS)/sizeof(uint16_t); j >= 0; j--) {
+        allOff();
+        for (i=0; i<RINGS[j]; i++) {
+          strip.setPixelColor(idxSoFar - i, Wheel(k % 255)); 
+        }
+  
+        idxSoFar -= RINGS[j];
+        strip.show();
+        delay(wait);
+      }
+    }
+  }
+}
+
+//void bullsEyeSlowFade(uint8_t wait, uint8_t gapValue) {
+//  uint16_t i, j;
+//
+//  for(j=0; j<COLORS*5; j++) { // 5 cycles of all colors on wheel
+//
+//    for (i=0; i<sizeof(outer)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(outer[i], Wheel(j % 255)); 
+//    }
+//
+//    strip.show();
+//    delay(wait);
+//
+//    for (i=0; i<sizeof(inner)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(inner[i], Wheel(j+gapValue*1 % 255)); 
+//    }
+//
+//    strip.show();
+//    delay(wait);
+//
+//    for (i=0; i<sizeof(jewel)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(jewel[i], Wheel(j+gapValue*2 % 255)); 
+//    }
+//
+//    strip.show();
+//    delay(wait);
+//    
+//    for (i=0; i<sizeof(center)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(center[i], Wheel(j+gapValue*3 % 255)); 
+//    }
+//    
+//    strip.show();
+//    delay(wait);
+//  }
+//}
+//
+//void bullsEye(uint8_t wait, uint8_t gapValue) {
+//  uint16_t i, j;
+//
+//  for(j=0; j<COLORS*5; j++) { // 5 cycles of all colors on wheel
+//
+//    for (i=0; i<sizeof(outer)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(outer[i], Wheel(j % 255)); 
+//    }
+//
+//    for (i=0; i<sizeof(inner)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(inner[i], Wheel(j+gapValue*1 % 255)); 
+//    }
+//
+//    for (i=0; i<sizeof(jewel)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(jewel[i], Wheel(j+gapValue*2 % 255)); 
+//    }
+//    
+//    for (i=0; i<sizeof(center)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(center[i], Wheel(j+gapValue*3 % 255)); 
+//    }
+//    
+//    strip.show();
+//    delay(wait);
+//  }
+//}
+//
+//void bullsEyeReverse(uint8_t wait, uint8_t gapValue) {
+//  uint16_t i, j;
+//  uint16_t oneC, twoC, threeC, fourC;
+//
+//  for(j=0; j<COLORS*5; j++) { // 5 cycles of all colors on wheel
+//
+//    for (i=0; i<sizeof(center)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(center[i], Wheel(j % 255)); 
+//    }
+//
+//    for (i=0; i<sizeof(jewel)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(jewel[i], Wheel(j+gapValue*1 % 255)); 
+//    }
+//    
+//    for (i=0; i<sizeof(inner)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(inner[i], Wheel(j+gapValue*2 % 255)); 
+//    }
+//
+//    for (i=0; i<sizeof(outer)/sizeof(uint16_t); i++) {
+//      strip.setPixelColor(outer[i], Wheel(j+gapValue*3 % 255)); 
+//    }
+//    
+//    strip.show();
+//    delay(wait);
+//  }
+//}
 
 void randomFillUp(uint8_t wait) {
   allOff();
@@ -135,14 +314,14 @@ void randomFillUp(uint8_t wait) {
     Lit[i] = false;
   }
 
-  uint16_t pixel = random() % strip.numPixels();
+  uint16_t pixel = rand() % strip.numPixels();
 
   while (num != strip.numPixels()) {
     while(Lit[pixel]) {
-      pixel = random() % strip.numPixels();
+      pixel = rand() % strip.numPixels();
     }
     
-    strip.setPixelColor(pixel, Wheel(random() % COLORS));
+    strip.setPixelColor(pixel, Wheel(rand() % COLORS));
     Lit[pixel] = true;
     num++;
     
@@ -155,8 +334,8 @@ void randomFillUp(uint8_t wait) {
 
 // randomly light a random pixel
 void randomLight(uint8_t wait) {
-  uint16_t pixel = random() % strip.numPixels();
-  strip.setPixelColor(pixel, Wheel(random() % COLORS));
+  uint16_t pixel = rand() % strip.numPixels();
+  strip.setPixelColor(pixel, Wheel(rand() % COLORS));
   strip.show();
   delay(wait);
   strip.setPixelColor(pixel, OFF);
@@ -165,12 +344,12 @@ void randomLight(uint8_t wait) {
 // Light one at a time around the ring
 void colorSpin(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(pixels[i], c);
+    strip.setPixelColor(i, c);
     if (i == 0) {
-      strip.setPixelColor(pixels[strip.numPixels()-1], strip.Color(0, 0, 0));
+      strip.setPixelColor(strip.numPixels()-1, strip.Color(0, 0, 0));
     }
     else {
-      strip.setPixelColor(pixels[i-1], strip.Color(0, 0, 0));
+      strip.setPixelColor(i-1, strip.Color(0, 0, 0));
     }
     strip.show();
     delay(wait);
@@ -181,19 +360,19 @@ void colorBounce(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels()*2; i++) {
     if (i < strip.numPixels())
     {
-      strip.setPixelColor(pixels[i], c);
+      strip.setPixelColor(i, c);
       if (i == 0) {
-        strip.setPixelColor(pixels[strip.numPixels()-1], strip.Color(0, 0, 0));
+        strip.setPixelColor(strip.numPixels()-1, strip.Color(0, 0, 0));
       }
       else {
-        strip.setPixelColor(pixels[i-1], strip.Color(0, 0, 0));
+        strip.setPixelColor(i-1, strip.Color(0, 0, 0));
       }
     }
     else {
       uint16_t j = strip.numPixels()*2 - i - 1;
 
-      strip.setPixelColor(pixels[j], c);
-      strip.setPixelColor(pixels[j+1], strip.Color(0, 0, 0));
+      strip.setPixelColor(j, c);
+      strip.setPixelColor(j+1, strip.Color(0, 0, 0));
     }
     strip.show();
     delay(wait);
@@ -204,13 +383,13 @@ void colorBreathe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels()*2; i++) {
     if (i < strip.numPixels())
     {
-      strip.setPixelColor(pixels[i], c);
+      strip.setPixelColor(i, c);
     }
     else {
       uint16_t j = strip.numPixels()*2 - i - 1;
 
-      strip.setPixelColor(pixels[j], c);
-      strip.setPixelColor(pixels[j+1], strip.Color(0, 0, 0));
+      strip.setPixelColor(j, c);
+      strip.setPixelColor(j+1, strip.Color(0, 0, 0));
     }
     strip.show();
     delay(wait);
@@ -220,7 +399,7 @@ void colorBreathe(uint32_t c, uint8_t wait) {
 // Fill the dots one after the other with a color
 void colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(pixels[i], c);
+    strip.setPixelColor(i, c);
     strip.show();
     delay(wait);
   }
@@ -231,7 +410,7 @@ void rainbow(uint8_t wait) {
 
   for(j=0; j<256; j++) {
     for(i=0; i<strip.numPixels(); i++) {
-      strip.setPixelColor(pixels[i], Wheel((i+j) & 255));
+      strip.setPixelColor(i, Wheel((i+j) & 255));
     }
     strip.show();
     delay(wait);
@@ -244,7 +423,7 @@ void rainbowCycle(uint8_t wait) {
 
   for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
     for(i=0; i< strip.numPixels(); i++) {
-      strip.setPixelColor(pixels[i], Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
     }
     strip.show();
     delay(wait);
@@ -256,14 +435,14 @@ void theaterChase(uint32_t c, uint8_t wait) {
   for (int j=0; j<10; j++) {  //do 10 cycles of chasing
     for (int q=0; q < 3; q++) {
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(pixels[i+q], c);    //turn every third pixel on
+        strip.setPixelColor(i+q, c);    //turn every third pixel on
       }
       strip.show();
 
       delay(wait);
 
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(pixels[i+q], 0);        //turn every third pixel off
+        strip.setPixelColor(i+q, 0);        //turn every third pixel off
       }
     }
   }
@@ -274,14 +453,14 @@ void theaterChaseRainbow(uint8_t wait) {
   for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
     for (int q=0; q < 3; q++) {
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(pixels[i+q], Wheel( (i+j) % 255));    //turn every third pixel on
+        strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
       }
       strip.show();
 
       delay(wait);
 
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(pixels[i+q], 0);        //turn every third pixel off
+        strip.setPixelColor(i+q, 0);        //turn every third pixel off
       }
     }
   }
